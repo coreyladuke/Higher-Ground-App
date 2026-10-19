@@ -1,0 +1,26 @@
+{
+  "name": "Higher Ground · Life Practice",
+  "short_name": "Higher Ground",
+  "description": "A personal mountain journey through real-life practice and self-reflection.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101e25",
+  "theme_color": "#101e25",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ]
+}
