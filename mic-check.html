@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b0c0d"><title>Higher Ground • Microphone Test</title>
+<style>
+*{box-sizing:border-box}html{background:#0a0b0e;color:#f4eee2;font-family:system-ui,-apple-system,sans-serif}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 27%,#27262b 0%,#0a0b0e 62%)}main{max-width:460px;width:100%;padding:clamp(21px,6vw,36px);border:1px solid #686052;border-radius:25px;background:linear-gradient(148deg,#222126 0%,#131317 73%);box-shadow:0 24px 70px #0007}.tiny{font-size:11px;text-transform:uppercase;letter-spacing:.26em;color:#dab975}h1{font:400 2.6rem/1.05 Georgia,serif;margin:14px 0 16px}p{line-height:1.6;color:#e2d9c9}.note{font-size:13px;color:#c8bba7}.light{font-size:2.4rem;color:#e3ba6d;margin-bottom:7px}.btn{display:block;width:100%;min-height:58px;border:0;border-radius:15px;font-weight:750;font-size:17px;margin:15px 0 9px;background:#f6dcaa;color:#241f1a}.btn:disabled{opacity:.48}.secondary{background:#313139;color:#f5e8ce;border:1px solid #8e7b5d}.status{border:1px solid #574c3b;border-radius:12px;min-height:66px;padding:17px;margin:21px 0 12px;color:#fbecd4;line-height:1.4;background:#111217}audio{width:100%;margin:16px 0}a{color:#f6d7a5}.good{color:#aee5b2}small{font-size:12px;color:#aea8a2}
+</style></head><body><main>
+<div class="tiny">Higher Ground · voice foundation</div>
+<div class="light" aria-hidden="true">◩</div>
+<h1>Does your microphone actually record?</h1>
+<p>This tests your iPhone's real microphone capture, not unreliable browser speech recognition. Speak for a few seconds, stop, then play it back.</p>
+<p class="note">🔒 Everything stays on your device in this test. There is no AI, no upload, and no automatic transcription.</p>
+<button class="btn" type="button" id="start">🎙 Start recording</button>
+<button class="btn secondary" type="button" id="stop" disabled>◼ Stop & listen</button>
+<div class="status" id="status" role="status" aria-live="polite">Ready. Tap Start recording and allow microphone access.</div>
+<audio controls playsinline id="playback" hidden></audio>
+<p id="result" class="note"></p>
+<a href="./" class="note">← Return to Higher Ground</a><br><small>Diagnostic only. The next step is connecting this recording to private speech-to-text.</small>
+</main><script>
+(()=>{'use strict';
+const start=document.getElementById('start'),stop=document.getElementById('stop'),status=document.getElementById('status'),audio=document.getElementById('playback'),result=document.getElementById('result');
+let stream=null,recorder=null,parts=[],timer=null,url=null;const set=m=>{status.textContent=m};
+const endTracks=()=>{if(stream){stream.getTracks().forEach(x=>x.stop());stream=null}};
+function clearOld(){if(url){URL.revokeObjectURL(url);url=null}audio.removeAttribute('src');audio.load();audio.hidden=true;result.textContent='';}
+function reset(){if(timer)clearTimeout(timer);timer=null;endTracks();start.disabled=false;stop.disabled=true;recorder=null;}
+start.onclick=async()=>{
+ if(recorder)return;clearOld();
+ if(!window.isSecureContext){set('Microphone requires HTTPS. Open this page on the published GitHub Pages site.');return}
+ if(!navigator.mediaDevices?.getUserMedia){set('This browser does not expose microphone capture. Try this same link in Safari rather than the Home Screen web app.');return}
+ if(!window.MediaRecorder){set('Microphone is available but this browser cannot record audio.');return}
+ start.disabled=true;set('Requesting microphone permission…');
+ try{
+  stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
+  const supported=['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg'].find(x=>MediaRecorder.isTypeSupported?.(x));
+  recorder=new MediaRecorder(stream,supported?{mimeType:supported}:undefined);parts=[];const current=recorder;
+  current.ondataavailable=e=>{if(e.data?.size)parts.push(e.data)};
+  current.onerror=e=>{reset();set('The recorder reported an error. Try using this page in Safari.')};
+  current.onstop=()=>{
+   const recorded=new Blob(parts,{type:current.mimeType||supported||'audio/mp4'});
+   reset();
+   if(!recorded.size){set('No audio bytes were captured. That confirms a recording problem, not an AI issue.');return}
+   url=URL.createObjectURL(recorded);audio.src=url;audio.hidden=false;
+   set('✓ Recording captured! Tap Play to hear your own voice.');result.textContent=`Recorded ${(recorded.size/1024).toFixed(1)} KB · ${recorded.type||'audio'}. Speech-to-text is the next separate step.`;
+  };
+  current.start(500);stop.disabled=false;set('● Recording. Say a sentence, then press Stop & listen. Maximum 20 seconds.');
+  timer=setTimeout(()=>{if(recorder&&recorder.state!=='inactive')stop.click()},20000);
+ }catch(e){reset();const name=String(e?.name||'');set(name==='NotAllowedError'?'Microphone access was denied. In Safari, tap the site settings icon in the address bar and allow Microphone, then reload.':name==='NotFoundError'?'No microphone was available to the browser.':'Could not start recording: '+(e?.message||name||'unknown error'))}
+};
+stop.onclick=()=>{if(!recorder)return;stop.disabled=true;set('Finishing your recording…');try{if(recorder.state!=='inactive')recorder.stop()}catch(e){reset();set('Could not stop recording.')};};
+window.addEventListener('pagehide',()=>{if(recorder&&recorder.state!=='inactive')try{recorder.stop()}catch(e){}endTracks();if(url)URL.revokeObjectURL(url)});
+})();</script></body></html>
