@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b0c0d"><title>Higher Ground · Speak & See Words</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}html{background:#0a0b0e;color:#f4eee2;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse at 50% 21%,#29272b 0%,#0a0b0e 65%)}main{max-width:520px;width:100%;padding:clamp(21px,6vw,35px);border:1px solid #60574b;border-radius:25px;background:linear-gradient(152deg,#242227 0%,#131317 80%);box-shadow:0 24px 70px #0008}.kicker{font-size:10px;text-transform:uppercase;letter-spacing:.24em;color:#dab975;font-weight:750}h1{font:400 clamp(29px,8vw,43px)/1.07 Georgia,serif;margin:13px 0 15px}h2{font:400 22px Georgia,serif;margin:0 0 12px}p{line-height:1.58;color:#e2d9c9}small{font-size:12px;color:#c8bbaa}.step{border:1px solid #514938;border-radius:17px;padding:17px;margin:18px 0;background:#0b0d10cc}.step-tag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.18em;color:#e6c785;margin-bottom:10px}button{display:block;width:100%;min-height:51px;border:0;border-radius:12px;font-weight:720;font-size:16px;margin:11px 0 0;background:#f6dcaa;color:#211e1a}button:disabled{opacity:.42}button.secondary{background:#323139;color:#f5e8ce;border:1px solid #80705c}label{display:block;margin:11px 0 6px;font-size:13px;font-weight:680;color:#e7d9be}input:not([type=checkbox]),textarea{width:100%;max-width:100%;background:#101116;color:#fff3df;border:1px solid #7b705e;padding:13px 12px;border-radius:11px;font:16px system-ui}textarea{min-height:115px;resize:vertical;line-height:1.5}.status{border:1px solid #63553e;border-radius:12px;min-height:66px;padding:14px;margin:18px 0 12px;color:#fbecd4;line-height:1.48;background:#111217}.note{font-size:12px;color:#d2c5af}.consent{display:flex;gap:10px;align-items:flex-start;line-height:1.5;color:#eee0c9;font-size:13px;margin:12px 0}.consent input{margin-top:4px;min-width:18px;min-height:18px;accent-color:#eac783}.row{display:flex;gap:9px}.row button{flex:1}.good{color:#b3e4bb}audio{width:100%;margin:11px 0 0}a{color:#f6d7a5}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #f5d297;outline-offset:3px}
+</style></head><body><main>
+<div class="kicker">Higher Ground · one feature at a time</div>
+<h1>Speak. See your words.</h1>
+<p>Your iPhone has already proved it can record. This test adds the missing step: <strong>transcribing your recording into editable text</strong>.</p>
+<div class="step"><div class="step-tag">01 · Connect the private free transcription Worker</div>
+<p class="note">This test requires a Cloudflare Worker with an AI binding and a private test code. The website never stores your code. Your microphone recording is sent to Cloudflare only after you consent and press Transcribe.</p>
+<label for="endpoint">Cloudflare Worker address</label><input id="endpoint" value="https://higher-ground-voice-test.corey-b6c.workers.dev" inputmode="url" autocomplete="url" placeholder="https://higher-ground-voice-test.username.workers.dev" autocapitalize="off" spellcheck="false">
+<label for="code">Private test code (not your Cloudflare login password)</label><input id="code" type="password" placeholder="Code you saved as HG_VOICE_TOKEN" autocomplete="off" autocapitalize="off" spellcheck="false">
+<button class="secondary" id="check" type="button">Check connection</button></div>
+<div class="step"><div class="step-tag">02 · Record your response</div>
+<button id="start" type="button">🎙 Start recording</button><button class="secondary" id="stop" type="button" disabled>◼ Stop recording</button>
+<audio controls playsinline id="playback" hidden></audio><div class="status" id="status" role="status" aria-live="polite">Ready. Begin by connecting your Worker or record a sentence now.</div>
+<label class="consent"><input type="checkbox" id="consent"> <span>I agree to send <strong>this recording</strong> to Cloudflare Workers AI for speech-to-text. It is processed remotely, not by the web page alone. I can listen and choose not to send.</span></label>
+<button type="button" id="transcribe" disabled>✨ Transcribe this recording</button></div>
+<div class="step"><div class="step-tag">03 · Read and edit the words</div>
+<label for="transcript">Your spoken response</label><textarea id="transcript" placeholder="Once connected, your spoken words appear here. You can edit them before using them in Higher Ground."></textarea>
+<div class="row"><button class="secondary" type="button" id="copy">Copy words</button><button class="secondary" type="button" id="clear">Clear text</button></div>
+<p class="note">This is a focused test, not a replacement for the main Higher Ground game. Your words are not submitted to a LIFE encounter automatically.</p>
+</div>
+<a href="./">← Higher Ground</a>
+<p class="note">Your local recording is discarded when you leave. No transcript is automatically saved by this page. Cloudflare's own data handling applies to audio sent for inference.</p>
+</main><script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),start=$('start'),stop=$('stop'),status=$('status'),audio=$('playback'),text=$('transcript');
+let stream=null,recorder=null,parts=[],clip=null,timer=null,playUrl=null,busy=false;
+const update=s=>{status.textContent=s};
+const stopTracks=()=>{if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}};
+const reset=()=>{if(timer)clearTimeout(timer);timer=null;stopTracks();start.disabled=false;stop.disabled=true;recorder=null;};
+function workerUrl(){const t=$('endpoint').value.trim().replace(/\/+$/,'');if(!/^https:\/\/[a-z0-9.-]+\.workers\.dev$/i.test(t))throw Error('Enter the full https://...workers.dev address from Cloudflare.');return t}
+function dispose(){if(playUrl){URL.revokeObjectURL(playUrl);playUrl=null}audio.hidden=true;audio.removeAttribute('src');audio.load();clip=null;$('transcribe').disabled=true;$('consent').checked=false;}
+try{$('endpoint').value=localStorage.getItem('higherGroundVoiceWorkerUrl')||'';}catch(_){}
+$('check').onclick=async()=>{let url;try{url=workerUrl()}catch(e){update(e.message);return}update('Checking your Worker…');try{const r=await fetch(url+'/health',{method:'GET',signal:AbortSignal.timeout(12000)});const j=await r.json();if(!r.ok)throw Error(j.error||'Connection failed');try{localStorage.setItem('higherGroundVoiceWorkerUrl',url)}catch(_){}update(j.ready?'✓ Cloudflare Worker and Workers AI are ready.':'Connected, but Workers AI binding is missing. Add the binding named AI in Cloudflare.')}catch(e){update('Worker connection failed: '+e.message)}};
+start.onclick=async()=>{if(recorder||busy)return;dispose();if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){update('Your browser cannot capture audio here. Open the published https link in Safari.');return}start.disabled=true;update('Asking for microphone access…');try{
+ stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
+ const format=['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg'].find(m=>MediaRecorder.isTypeSupported?.(m));
+ recorder=new MediaRecorder(stream,format?{mimeType:format}:undefined);parts=[];const r=recorder;
+ r.ondataavailable=e=>{if(e.data?.size)parts.push(e.data)};
+ r.onerror=()=>{reset();update('Microphone error. Please try Safari.')};
+ r.onstop=()=>{clip=new Blob(parts,{type:r.mimeType||format||'audio/mp4'});reset();if(clip.size<200){update('The recording was empty. Please try again.');return}if(clip.size>3500000){clip=null;update('Recording too large. Try a shorter sentence.');return}playUrl=URL.createObjectURL(clip);audio.src=playUrl;audio.hidden=false;$('transcribe').disabled=false;update('✓ Audio captured. Play it back, then check the consent box and tap Transcribe.');};
+ r.start(500);stop.disabled=false;update('● Recording. Speak naturally, then press Stop. Maximum 20 seconds.');timer=setTimeout(()=>{if(recorder&&recorder.state!=='inactive')stop.click()},20000);
+}catch(e){reset();update('Could not start microphone: '+(e?.message||e?.name||'unknown'))}};
+stop.onclick=()=>{if(!recorder)return;stop.disabled=true;update('Finishing recording…');try{if(recorder.state!=='inactive')recorder.stop()}catch(e){reset();update('Could not stop recording.')}};
+$('transcribe').onclick=async()=>{if(!clip||busy)return;if(!$('consent').checked){update('Check the consent box before sending your audio.');return}let url;try{url=workerUrl()}catch(e){update(e.message);return}const token=$('code').value;if(token.length<24){update('Enter your private HG_VOICE_TOKEN (at least 24 characters). Do not use your Cloudflare password.');return}
+ busy=true;$('transcribe').disabled=true;update('Sending this recording securely for transcription…');
+ try{const resp=await fetch(url+'/v1/transcribe',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':clip.type.split(';')[0]||'audio/mp4'},body:clip,signal:AbortSignal.timeout(40000)});
+ const data=await resp.json().catch(()=>({}));if(!resp.ok)throw Error(data.error||'Transcription failed ('+resp.status+')');if(!data.text)throw Error('No words returned');text.value=[text.value.trim(),data.text].filter(Boolean).join(text.value.trim()?' ':'');update('✓ It worked! Your words appear below. You can correct or copy them.');try{localStorage.setItem('higherGroundVoiceWorkerUrl',url)}catch(_){}}
+ catch(e){update('Could not transcribe: '+(e.message||'Unknown error')+' · Your recorded audio remains here; you can retry.');}
+ finally{busy=false;$('transcribe').disabled=!clip;}
+};
+$('copy').onclick=async()=>{if(!text.value.trim()){update('Nothing to copy yet.');return}try{await navigator.clipboard.writeText(text.value);update('✓ Words copied.')}catch(e){text.focus();text.select();update('Select and copy the highlighted words.')}};
+$('clear').onclick=()=>{text.value='';update('Text cleared. You can record another response.');};
+window.addEventListener('pagehide',()=>{if(recorder&&recorder.state!=='inactive')try{recorder.stop()}catch(_){}stopTracks();if(playUrl)URL.revokeObjectURL(playUrl)});
+})();</script></body></html>
