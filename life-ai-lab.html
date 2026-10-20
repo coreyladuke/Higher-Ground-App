@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d2027"><title>Higher Ground · LIFE · Real Conversation Test</title>
+<style>
+:root{color-scheme:dark;--cream:#fbf3e8;--gold:#f2d8a8;--soft:rgba(248,238,220,.77);--serif:Georgia,"Times New Roman",serif}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#0a1923;color:var(--cream);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100dvh;background:linear-gradient(180deg,rgba(1,14,23,.32),rgba(1,16,23,.78)),url('mountain-ridge.jpg') center center / cover fixed no-repeat}
+button,input,textarea{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}button:disabled{opacity:.55;cursor:wait}
+.app{width:min(100%,610px);min-height:100dvh;margin:auto;display:flex;flex-direction:column;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 18px) clamp(18px,5vw,36px) calc(env(safe-area-inset-bottom) + 24px)}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px}header span{font-family:var(--serif);font-size:1.5rem}header a{color:var(--cream);text-decoration:none;font-size:.92rem;white-space:nowrap;border-bottom:1px solid #d1c6b2}
+.center{display:grid;gap:16px;margin:auto 0 12px;padding:4vh 0}small.tag{font-size:.78rem;letter-spacing:.2em;color:var(--gold);font-weight:700}h1{font:normal clamp(2rem,7vw,3rem)/1.15 var(--serif);margin:0;text-shadow:0 5px 20px #06111d}
+.scene{border-left:2px solid rgba(242,216,168,.68);padding:2px 0 2px 18px;font:normal clamp(1.32rem,4vw,1.6rem)/1.5 var(--serif);text-shadow:0 2px 14px #050b0f}
+.thread{display:grid;gap:10px;max-height:25dvh;overflow-y:auto;overscroll-behavior:contain;padding-right:4px}
+.bubble{border-radius:18px;padding:11px 14px;font-size:1rem;line-height:1.5;border:1px solid rgba(253,235,199,.15);background:rgba(2,15,24,.42);backdrop-filter:blur(9px)}
+.bubble strong{display:block;font-size:.73rem;letter-spacing:.15em;color:var(--gold);margin-bottom:4px;text-transform:uppercase}.bubble.user{background:rgba(12,40,49,.5);border-color:rgba(180,218,211,.18)}
+.help{font-size:.9rem;color:var(--soft);line-height:1.55}textarea{width:100%;min-height:82px;max-height:22dvh;resize:vertical;border-radius:21px;background:rgba(4,16,24,.69);border:1px solid rgba(249,225,195,.33);padding:15px;color:var(--cream);line-height:1.5;box-shadow:0 10px 28px rgba(0,0,0,.16)}textarea::placeholder{color:#c8ccca}
+.actions{display:flex;gap:9px;align-items:center;justify-content:space-between}button{min-height:48px;padding:10px 16px;border:0;border-radius:999px;font-weight:650}.send{background:var(--gold);color:#22170f;flex:1}.secondary{background:rgba(0,15,26,.44);color:var(--cream);border:1px solid rgba(255,235,202,.25)}.flat{background:transparent;color:var(--cream);text-decoration:underline;text-underline-offset:4px}.bottom{display:grid;gap:10px}.status{min-height:22px;color:#f3dec0;font-size:.9rem;line-height:1.4}.muted{font-size:.78rem;color:var(--soft);line-height:1.55;margin:0}
+.modal{position:fixed;inset:0;z-index:9;background:rgba(2,10,16,.74);display:grid;place-items:center;padding:18px}.modal[hidden]{display:none}.modal .card{width:min(100%,410px);padding:24px;border-radius:24px;background:#10252e;color:var(--cream);box-shadow:0 20px 80px #000b;border:1px solid #bfa77855;display:grid;gap:14px}.modal h2{font:normal 1.7rem var(--serif);margin:0}.modal p{line-height:1.5;margin:0;font-size:.94rem}.modal input[type=password]{height:52px;border-radius:12px;border:1px solid #bfb2a5;background:#03121c;color:var(--cream);padding:10px 14px;width:100%;font-size:1rem}.modal label{display:flex;gap:11px;align-items:start;line-height:1.4;font-size:.92rem}.modal input[type=checkbox]{width:21px;height:21px;flex-shrink:0;accent-color:#eac786}.modal .btnrow{display:flex;gap:9px}.modal button{flex:1}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:0ms!important;transition-duration:0ms!important}}
+@media(max-height:720px){.center{gap:10px;padding:1vh 0}.thread{max-height:21dvh}h1{font-size:1.9rem}textarea{min-height:67px}}
+</style></head><body>
+<main class="app">
+<header><span>Higher Ground</span><a href="./index.html">Exit test ↗</a></header>
+<div class="center">
+  <small class="tag">LIFE · ONE REAL CONVERSATION</small>
+  <h1>Can you help tonight?</h1>
+  <div class="scene" id="sceneText">Rae: “Hey, could you help me pick up a couch tonight? I know it's short notice.”</div>
+  <div class="thread" id="thread" role="log" aria-live="polite" aria-label="Your conversation"></div>
+</div>
+<section class="bottom" aria-label="Your response">
+  <div class="help">Answer however you actually would. Ask why, say no, make a joke, suggest something different, or change your mind. Rae should react to <em>your</em> words.</div>
+  <label for="answer" class="sr-label">Your answer to Rae</label>
+  <textarea id="answer" maxlength="1200" placeholder="Say what you’d really say…" aria-describedby="status"></textarea>
+  <div class="actions">
+    <button class="secondary" id="speak" aria-label="Focus reply to use iPhone keyboard dictation">🎙 Speak</button>
+    <button class="send" id="send">Send to Rae →</button>
+    <button class="flat" id="reset">Restart</button>
+  </div>
+  <div class="status" id="status" role="status">Nothing sent yet. AI replies are real only when the live service responds.</div>
+  <p class="muted">Private test: text is sent to Cloudflare Workers AI only after your consent. No XP awarded, no conversation saved by this page. The iPhone keyboard microphone can dictate into the text box.</p>
+</section>
+</main>
+<div class="modal" id="gate" hidden role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+<form class="card" id="gateForm">
+ <h2 id="gateTitle">Connect the real AI</h2>
+ <p>Use the same private test code as the working Reflection Pond. Your LIFE replies will be sent to Cloudflare Workers AI for this fictional conversation. Nothing is automatically saved here.</p>
+ <label for="privateCode">Private test code (kept in this tab only)</label>
+ <input id="privateCode" type="password" autocapitalize="off" autocorrect="off" autocomplete="off" minlength="16" required placeholder="Your existing private code">
+ <label><input type="checkbox" id="consent" required> I agree to send my written replies to Cloudflare Workers AI for this test.</label>
+ <div class="status" id="gateStatus"></div>
+ <div class="btnrow"><button type="button" class="secondary" id="cancelGate">Not now</button><button class="send" type="submit">Connect & send</button></div>
+</form>
+</div>
+<script>
+(()=>{
+'use strict';
+const API='https://higher-ground-voice-test.corey-b6c.workers.dev/v1/life';
+const SCENE='friend-couch';const START="Hey, could you help me pick up a couch tonight? I know it's short notice.";
+const $=id=>document.getElementById(id);
+let token='',consented=false,pending=false,history=[],activeController=null;
+function message(role,content){const b=document.createElement('article');b.className='bubble '+(role==='user'?'user':'');const label=document.createElement('strong');label.textContent=role==='user'?'YOU':'RAE';const t=document.createElement('span');t.textContent=content;b.append(label,t);$('thread').append(b);$('thread').scrollTop=$('thread').scrollHeight;}
+function status(text){$('status').textContent=text;}
+function busy(bool){pending=bool;$('send').disabled=bool;$('answer').disabled=bool;$('reset').disabled=bool;$('send').textContent=bool?'Rae is responding…':'Send to Rae →';}
+function reset(){activeController?.abort();activeController=null;history=[];pending=false;$('thread').replaceChildren();$('answer').value='';$('send').disabled=false;$('answer').disabled=false;$('reset').disabled=false;$('send').textContent='Send to Rae →';status('Fresh scene. Try a different answer and see if Rae responds differently.');}
+async function send(){if(pending)return;const value=$('answer').value.trim();if(!value){status('Say or type something first.');$('answer').focus();return}if(history.filter(x=>x.role==='user').length>=4){status('This short scene has ended. Restart to try a different approach.');return}
+if(!consented||!token){$('gate').hidden=false;$('privateCode').focus();return}
+const transcript=history.map(x=>({...x}));const controller=new AbortController();activeController=controller;const timeout=setTimeout(()=>controller.abort(),35000);
+busy(true);status('Waiting for Rae’s real AI response…');
+try{const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({scenarioId:SCENE,message:value,history:transcript}),signal:controller.signal});
+let data;try{data=await res.json()}catch(_){throw Error('The server did not return readable JSON. Nothing was saved.')}
+if(!res.ok){if(res.status===401){token='';consented=false;throw Error('Private code was rejected. Check the code and try again.')}throw Error(data?.error||`Service error (${res.status}).`)}
+if(!data||typeof data.reply!=='string'||!data.reply.trim()||data.source!=='workers-ai'&&data.source!=='safety-rule')throw Error('No verified AI response returned.');
+message('user',value);message('assistant',data.reply);history.push({role:'user',content:value},{role:'assistant',content:data.reply});$('answer').value='';status(data.source==='workers-ai'?`Live AI responded · ${history.length/2} turn${history.length===2?'':'s'} · nothing saved`:'Safety response returned. The roleplay is paused.');
+if(history.filter(x=>x.role==='user').length>=4){$('send').disabled=true;status('Four-turn scene complete. Tap Restart to try another approach.');}
+}catch(e){if(e.name!=='AbortError'||pending){status(e.name==='AbortError'?'Request timed out. Your unsent answer is still here.':e.message||'Service unreachable. Your answer is still here.')} }
+finally{clearTimeout(timeout);if(activeController===controller){activeController=null;busy(false);if(history.filter(x=>x.role==='user').length>=4)$('send').disabled=true}}
+}
+$('send').onclick=send;$('reset').onclick=reset;$('speak').onclick=()=>{$('answer').focus();status('Tap the microphone on your iPhone keyboard to dictate. The Speak button cannot turn Apple dictation on automatically.')};
+$('answer').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();void send()}});
+$('gateForm').addEventListener('submit',e=>{e.preventDefault();const value=$('privateCode').value.trim();if(value.length<16||!$('consent').checked){$('gateStatus').textContent='Enter your existing 16+ character private code and confirm consent.';return}token=value;consented=true;$('privateCode').value='';$('gate').hidden=true;void send()});
+$('cancelGate').onclick=()=>{$('gate').hidden=true;$('privateCode').value='';$('gateStatus').textContent='';status('Nothing sent. You can leave or try later.')};
+window.addEventListener('pagehide',()=>{activeController?.abort();token='';consented=false});
+// Controlled QA read-only helpers, not a fake response engine.
+window.HG_LIFE_QA={getState:()=>({turns:history.length/2,history:history.map(x=>({...x})),pending,liveEndpoint:API}),restart:reset};
+})();
+</script></body></html>
