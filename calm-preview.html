@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1012">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Higher Ground · Calm System</title>
+<style>
+:root{
+  --bg:#071013;
+  --ink:#f6f0e6;
+  --muted:rgba(246,240,230,.75);
+  --soft:rgba(255,255,255,.08);
+  --line:rgba(255,231,191,.24);
+  --gold:#ecd39b;
+  --gold2:#cfa65f;
+  --shadow:rgba(0,0,0,.45);
+  --panel:rgba(4,12,16,.36);
+  --panel-strong:rgba(4,12,16,.54);
+  --radius:28px;
+  --serif: Iowan Old Style, Palatino Linotype, Book Antiqua, Georgia, serif;
+  --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+body{overflow:hidden}
+button,input,textarea{font:inherit}
+button{border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,textarea:focus-visible{outline:2px solid rgba(255,232,184,.92);outline-offset:2px}
+textarea{resize:none}
+.app{position:relative;height:100dvh;overflow:hidden;background:#071013}
+.bg-layer,.bg-image,.bg-tint,.bg-ripple,.bg-breeze{position:absolute;inset:0}
+.bg-image{background-size:cover;background-position:center center;transform:scale(1.045);transition:opacity 1.8s ease, transform 14s ease;opacity:0;filter:saturate(.92) brightness(.78)}
+.bg-image.show{opacity:1;transform:scale(1.08)}
+.bg-tint{background:
+  radial-gradient(circle at 50% 35%, rgba(255,214,144,.16), transparent 34%),
+  linear-gradient(180deg, rgba(1,7,9,.24) 0%, rgba(3,10,12,.18) 22%, rgba(5,14,18,.32) 50%, rgba(4,9,12,.7) 100%);
+  pointer-events:none;
+}
+.bg-ripple{pointer-events:none;opacity:.34;background:
+  radial-gradient(circle at 50% 78%, rgba(255,255,255,.18) 0 1px, transparent 1px 26px);
+  background-size:100% 100%;mask-image:linear-gradient(180deg, transparent 0, transparent 48%, rgba(0,0,0,.8) 66%, rgba(0,0,0,1) 100%);
+  animation:ripple 16s linear infinite;
+}
+.bg-breeze{pointer-events:none;opacity:.14;background:
+  linear-gradient(120deg, transparent 0 35%, rgba(255,255,255,.6) 48%, transparent 62%);
+  transform:translateX(-120%);
+  animation:breeze 18s linear infinite;
+}
+@keyframes ripple{from{transform:translateY(0)}to{transform:translateY(16px)}}
+@keyframes breeze{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.screen{position:absolute;inset:0;padding:env(safe-area-inset-top) 20px env(safe-area-inset-bottom);display:grid;grid-template-rows:auto 1fr auto;opacity:0;pointer-events:none;transform:translateY(16px);transition:opacity .8s ease, transform .8s ease}
+.screen.active{opacity:1;pointer-events:auto;transform:translateY(0)}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding-top:10px;z-index:3}
+.icon-btn,.chip{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 16px;border-radius:999px;background:rgba(8,18,24,.24);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--ink);box-shadow:0 16px 40px var(--shadow), inset 0 0 0 1px rgba(255,255,255,.08)}
+.icon-btn{min-width:48px;padding:0}
+.brand{font-family:var(--serif);font-size:clamp(34px,6.4vw,54px);letter-spacing:.01em;text-shadow:0 10px 30px rgba(0,0,0,.42)}
+.eyebrow{font-size:.82rem;letter-spacing:.34em;text-transform:uppercase;color:rgba(245,233,208,.88);font-weight:700}
+.hero-wrap{align-self:center;display:grid;justify-items:center;text-align:center;gap:18px;padding-inline:10px}
+.hero-question{font-family:var(--serif);font-size:clamp(34px,8.5vw,66px);line-height:1.08;max-width:12ch;text-shadow:0 12px 34px rgba(0,0,0,.48)}
+.hero-sub{max-width:28rem;color:var(--muted);font-size:1rem;line-height:1.55;text-shadow:0 6px 24px rgba(0,0,0,.42)}
+.waterline{position:relative;display:inline-grid;justify-items:center;gap:4px}
+.waterline .reflection{font-family:var(--serif);font-size:clamp(34px,8.5vw,66px);line-height:1.08;opacity:.18;transform:scaleY(-1);filter:blur(1px);mask-image:linear-gradient(180deg, rgba(0,0,0,.7), transparent 82%)}
+.cta-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:min(440px,100%)}
+.primary,.secondary,.ghost{min-height:58px;border-radius:999px;padding:0 20px;font-weight:700;letter-spacing:.01em}
+.primary{background:linear-gradient(180deg, #f3ddb1 0%, #e7ca8c 100%);color:#1a140b;box-shadow:0 18px 40px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.5)}
+.secondary{background:rgba(5,13,18,.28);color:var(--ink);box-shadow:0 16px 40px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.12)}
+.ghost{background:transparent;color:var(--muted);min-height:auto;padding:8px 4px}
+.bottom-note{align-self:end;padding-bottom:16px;color:rgba(246,240,230,.72);text-align:center;font-size:.95rem}
+.panel{align-self:end;display:grid;gap:16px;background:linear-gradient(180deg, rgba(6,15,18,.2), rgba(3,10,13,.48));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:32px;padding:18px 16px 18px;box-shadow:0 18px 50px rgba(0,0,0,.36)}
+.panel.slim{background:linear-gradient(180deg, rgba(7,15,18,.08), rgba(3,10,13,.32))}
+.prompt{font-family:var(--serif);font-size:clamp(26px,6.2vw,42px);line-height:1.18;text-align:left;text-shadow:0 10px 24px rgba(0,0,0,.34)}
+.panel p{margin:0;color:var(--muted);line-height:1.5}
+.input-shell{display:grid;gap:10px}
+.field{width:100%;min-height:118px;padding:16px 18px;border-radius:24px;border:1px solid rgba(255,233,201,.18);background:rgba(2,7,10,.34);color:var(--ink);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.field::placeholder{color:rgba(246,240,230,.56)}
+.mini{font-size:.9rem;color:rgba(246,240,230,.68)}
+.action-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+.small-btn{min-height:48px;padding:0 16px;border-radius:999px;background:rgba(7,15,18,.28);color:var(--ink);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.response{display:grid;gap:12px;padding:16px 18px;border-radius:24px;background:rgba(2,8,11,.34);border:1px solid rgba(255,231,191,.15)}
+.response .label{font-size:.78rem;letter-spacing:.26em;text-transform:uppercase;color:rgba(245,233,208,.82);font-weight:700}
+.response-text{font-family:var(--serif);font-size:1.22rem;line-height:1.45}
+.question-float{align-self:center;padding-bottom:20dvh;display:grid;justify-items:center;text-align:center;gap:14px;padding-inline:14px}
+.question-float .floating{max-width:12ch;font-family:var(--serif);font-size:clamp(38px,9vw,72px);line-height:1.08;text-shadow:0 12px 36px rgba(0,0,0,.42)}
+.question-float .floating.small{font-size:clamp(22px,4.8vw,36px);max-width:18ch;color:rgba(250,244,236,.92)}
+.toolbar{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.footer-strip{display:flex;justify-content:center;gap:18px;align-items:center;color:rgba(246,240,230,.68);font-size:.9rem;padding-bottom:10px}
+.status{min-height:1.4em;color:#f2e5c6;font-size:.96rem}
+.hidden{display:none!important}
+.transition{position:absolute;inset:0;background:#000;color:#fff;display:grid;place-items:center;text-align:center;padding:40px;z-index:30;opacity:0;pointer-events:none;transition:opacity .9s ease}
+.transition.show{opacity:1;pointer-events:auto}
+.transition-box{display:grid;gap:18px;max-width:24rem}
+.transition .mono{font-family:var(--serif);font-size:clamp(36px,8.5vw,64px);line-height:1.08;letter-spacing:.01em}
+.transition .sub{color:rgba(255,255,255,.68);line-height:1.55}
+.drawer{position:absolute;right:20px;top:calc(env(safe-area-inset-top) + 64px);z-index:20;width:min(340px,calc(100vw - 40px));padding:18px;border-radius:26px;background:rgba(5,11,15,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 50px rgba(0,0,0,.45);display:none}
+.drawer.show{display:grid;gap:14px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.switch input{accent-color:#e7cb91}
+@media (max-width:430px){
+  .screen{padding-inline:14px}
+  .cta-row{grid-template-columns:1fr}
+  .action-row{grid-template-columns:1fr 1fr;grid-template-areas:'speak send' 'rest rest'}
+  .action-row .speak{grid-area:speak}.action-row .send{grid-area:send}.action-row .rest{grid-area:rest}
+  .panel{padding:16px 14px 16px}
+  .prompt{font-size:1.7rem}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="bg-layer">
+    <div class="bg-image show" id="bg1"></div>
+    <div class="bg-image" id="bg2"></div>
+    <div class="bg-tint"></div>
+    <div class="bg-ripple" id="bgRipple"></div>
+    <div class="bg-breeze"></div>
+  </div>
+
+  <section class="screen active" id="homeScreen">
+    <div class="topbar">
+      <button class="icon-btn" id="settingsBtn" aria-label="Open settings">✦</button>
+      <div class="chip" id="soundChip">Sound off</div>
+    </div>
+    <div class="hero-wrap">
+      <div class="brand">Higher Ground</div>
+      <div class="eyebrow">beautiful · calm · slightly alive</div>
+      <div class="waterline">
+        <div class="hero-question" id="homeLine">A little more breathing room.</div>
+        <div class="reflection" id="homeReflection">A little more breathing room.</div>
+      </div>
+      <div class="hero-sub">Less noise. Less pressure. One screen at a time. Talk things out, reflect, and move forward without feeling crowded by the app.</div>
+      <div class="cta-row">
+        <button class="primary" id="startLifeBtn">Guided moment</button>
+        <button class="secondary" id="startPondBtn">Reflection pond</button>
+      </div>
+    </div>
+    <div class="bottom-note">One question at a time. Calm transitions between every major screen change.</div>
+  </section>
+
+  <section class="screen" id="lifeScreen">
+    <div class="topbar">
+      <button class="icon-btn" data-back="home">✕</button>
+      <div class="chip">Guided moment</div>
+    </div>
+    <div></div>
+    <div class="panel">
+      <div class="eyebrow">LIFE</div>
+      <div class="prompt" id="lifePrompt">What happened, and what feels hardest about it right now?</div>
+      <p>Keep it simple. Say what happened. Say what it stirred up. The app should feel like a calm companion, not a chore list.</p>
+      <div class="input-shell">
+        <textarea class="field" id="lifeInput" placeholder="Use the iPhone keyboard mic or type a few lines. You don't need to write it perfectly."></textarea>
+        <div class="action-row">
+          <button class="small-btn speak" data-focus="lifeInput">🎙 Speak</button>
+          <button class="primary send" id="lifeSend">Ask Higher Ground</button>
+          <button class="small-btn rest" id="lifeRest">Let it rest</button>
+        </div>
+        <div class="status" id="lifeStatus"></div>
+      </div>
+      <div class="response hidden" id="lifeResponse">
+        <div class="label">Higher Ground</div>
+        <div class="response-text" id="lifeResponseText"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="pondScreen">
+    <div class="topbar">
+      <button class="icon-btn" data-back="home">✕</button>
+      <div class="chip">Reflection pond</div>
+    </div>
+    <div class="question-float">
+      <div class="eyebrow">a moment to yourself</div>
+      <div class="waterline">
+        <div class="floating" id="pondQuestion">What’s on your mind?</div>
+        <div class="reflection floating" id="pondReflection">What’s on your mind?</div>
+      </div>
+      <div class="floating small" id="pondLead">Say whatever is true. The response should come back as a question that helps you look inward.</div>
+    </div>
+    <div class="panel slim">
+      <div class="input-shell">
+        <textarea class="field" id="pondInput" placeholder="A hard day, a good day, a looping thought, or a quiet win."></textarea>
+        <div class="action-row">
+          <button class="small-btn speak" data-focus="pondInput">🎙 Speak</button>
+          <button class="primary send" id="pondSend">Send thought</button>
+          <button class="small-btn rest" id="pondClear">Clear</button>
+        </div>
+        <div class="status" id="pondStatus"></div>
+      </div>
+    </div>
+    <div class="footer-strip">Question only · no lecture · meant to eventually put itself down</div>
+  </section>
+
+  <section class="screen" id="journalScreen">
+    <div class="topbar">
+      <button class="icon-btn" data-back="home">✕</button>
+      <div class="chip">Quiet notes</div>
+    </div>
+    <div></div>
+    <div class="panel slim">
+      <div class="eyebrow">saved lines</div>
+      <div class="prompt">A few things worth keeping.</div>
+      <p id="journalEmpty">Nothing saved yet. When a line matters, keep it here without turning the app into a cluttered archive.</p>
+      <div id="journalList" class="input-shell"></div>
+      <div class="toolbar">
+        <button class="secondary" id="clearJournalBtn">Clear journal</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="drawer" id="settingsDrawer">
+    <div class="eyebrow">Global calm system</div>
+    <p>Design direction baked into the whole app: full-screen photography, soft motion, fewer buttons, floating questions, and black-and-white reflection interstitials.</p>
+    <label class="switch"><span>Ambient sound</span><input type="checkbox" id="soundToggle"></label>
+    <label class="switch"><span>Gentle motion</span><input type="checkbox" id="motionToggle" checked></label>
+    <div class="toolbar">
+      <button class="secondary" id="openJournalBtn">Quiet notes</button>
+      <button class="secondary" id="closeSettingsBtn">Done</button>
+    </div>
+  </div>
+
+  <div class="transition" id="transition">
+    <div class="transition-box">
+      <div class="mono" id="transitionLine">Breathe.</div>
+      <div class="sub" id="transitionSub">A small pause between moments so the app never snaps at the user.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const screens = {
+    home: $('homeScreen'),
+    life: $('lifeScreen'),
+    pond: $('pondScreen'),
+    journal: $('journalScreen')
+  };
+
+  const scenic = {
+    home: 'mountain-ridge.jpg',
+    life: 'mountain-encounter.jpg',
+    pond: 'mountain-reflection.jpg',
+    journal: 'mountain-ridge.jpg'
+  };
+
+  const affirmations = [
+    'Breathe.',
+    'Set the controller down.',
+    'Simple wins.',
+    'You do not have to solve everything at once.',
+    'There is room to pause.',
+    'Clarity can be quiet.',
+    'One honest step is enough.',
+    'Let the screen change gently.'
+  ];
+
+  const lifePrompts = [
+    'What happened, and what feels hardest about it right now?',
+    'What is the part of today your mind keeps circling back to?',
+    'What stress followed you in here?',
+    'What just happened, and what do you wish you could say about it?'
+  ];
+
+  const homeLines = [
+    'A little more breathing room.',
+    'A calmer way through the day.',
+    'Beautiful and calm. Slightly alive.',
+    'Less pressure. More perspective.'
+  ];
+
+  let current = 'home';
+  let flip = true;
+  let soundOn = false;
+  let motionOn = true;
+  let audioCtx, ambientNodes = [];
+
+  const saved = JSON.parse(localStorage.getItem('hg-calm-system') || '{"journal":[]}');
+  if (!Array.isArray(saved.journal)) saved.journal = [];
+
+  $('homeLine').textContent = pick(homeLines);
+  $('homeReflection').textContent = $('homeLine').textContent;
+  $('lifePrompt').textContent = pick(lifePrompts);
+
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  function setBackground(scene){
+    const active = flip ? $('bg1') : $('bg2');
+    const idle = flip ? $('bg2') : $('bg1');
+    idle.style.backgroundImage = `url(${scenic[scene]})`;
+    idle.classList.add('show');
+    active.classList.remove('show');
+    flip = !flip;
+    $('bgRipple').style.opacity = scene === 'pond' ? '.36' : '.12';
+  }
+
+  function setActive(name){
+    Object.entries(screens).forEach(([key, el]) => el.classList.toggle('active', key === name));
+    current = name;
+    setBackground(name);
+    $('settingsDrawer').classList.remove('show');
+  }
+
+  async function transitionTo(name){
+    if (name === current) return;
+    const line = pick(affirmations);
+    $('transitionLine').textContent = line;
+    $('transitionSub').textContent = name === 'pond'
+      ? 'A quiet pause before reflection.'
+      : name === 'life'
+      ? 'A soft landing before the next moment.'
+      : 'A gentle return, without an abrupt jump.';
+    const t = $('transition');
+    t.classList.add('show');
+    await wait(850);
+    setActive(name);
+    await wait(380);
+    t.classList.remove('show');
+  }
+
+  function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  function focusField(id){
+    const el = $(id);
+    el.focus();
+    const msg = id === 'pondInput'
+      ? 'Use the iPhone keyboard mic in the lower-right of the keyboard.'
+      : 'Use the iPhone keyboard mic or type a few words.';
+    (id === 'pondInput' ? $('pondStatus') : $('lifeStatus')).textContent = msg;
+  }
+
+  function generateLifeResponse(text){
+    const t = text.toLowerCase();
+    let opening = 'That sounds like a lot to carry.';
+    let direction = 'What matters most is slowing the moment down enough to see what is yours to do next.';
+    let next = 'What is one small, clean next step you can take today?';
+
+    if (/(angry|mad|furious|pissed|rage)/.test(t)) {
+      opening = 'You sound charged up, and that makes sense.';
+      direction = 'Anger usually shows us that something mattered, crossed a line, or hurt more than we wanted to admit.';
+      next = 'Can you protect the important thing without letting the moment choose your behavior?';
+    } else if (/(sad|hurt|lonely|alone|miss)/.test(t)) {
+      opening = 'There is a lot of hurt in that.';
+      direction = 'Pain does not always need a fast answer. Sometimes it needs company, honesty, and a little room.';
+      next = 'What would feel kind, steady, and true for you in the next hour?';
+    } else if (/(anxious|stress|overwhelm|panic|afraid|scared)/.test(t)) {
+      opening = 'That sounds overwhelming.';
+      direction = 'When everything feels loud, the next move is usually smaller than the mind wants it to be.';
+      next = 'What is the smallest useful action that would make the next ten minutes easier?';
+    } else if (/(good|win|better|proud|grateful|happy|progress)/.test(t)) {
+      opening = 'That sounds like a real win.';
+      direction = 'It matters to notice what is working, not just what hurts.';
+      next = 'What helped create that moment so you can do more of it on purpose?';
+    }
+
+    return `${opening} ${direction} ${next}`;
+  }
+
+  function generatePondQuestion(text){
+    const t = text.toLowerCase().trim();
+    if (!t) return 'What feels most true for you right now?';
+    if (/(angry|mad|pissed|furious|rage)/.test(t)) return 'What hurt, fear, or crossed line might be sitting underneath the anger?';
+    if (/(sad|hurt|lonely|miss|grief|grieving)/.test(t)) return 'What are you really longing for in the middle of this feeling?';
+    if (/(anxious|stress|panic|afraid|scared|overwhelm)/.test(t)) return 'If you made this moment ten percent smaller, what part would you deal with first?';
+    if (/(good|happy|better|proud|grateful|win|success)/.test(t)) return 'What about this feels worth remembering or building on?';
+    if (/(stuck|confused|unsure|lost)/.test(t)) return 'What do you already know, even if you do not yet know the whole answer?';
+    if (/(relationship|her|him|them|friend|wife|girlfriend|boyfriend|kid|son|daughter)/.test(t)) return 'What are you hoping for from this person, and what part of that is inside your control?';
+    return 'What part of what you just said feels most important to understand better?';
+  }
+
+  function updatePondQuestion(text){
+    const q = generatePondQuestion(text);
+    $('pondQuestion').textContent = q;
+    $('pondReflection').textContent = q;
+    $('pondLead').textContent = 'Stay with the part that rings true. The point is not to get stuck here forever.';
+  }
+
+  function renderJournal(){
+    const list = $('journalList');
+    list.innerHTML = '';
+    $('journalEmpty').style.display = saved.journal.length ? 'none' : 'block';
+    saved.journal.forEach((item, idx) => {
+      const box = document.createElement('div');
+      box.className = 'response';
+      box.innerHTML = `<div class="label">Saved line ${idx + 1}</div><div class="response-text">${escapeHtml(item)}</div>`;
+      list.appendChild(box);
+    });
+  }
+
+  function escapeHtml(str){
+    return str.replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  function saveJournal(line){
+    if (!line) return;
+    saved.journal.unshift(line);
+    saved.journal = saved.journal.slice(0, 12);
+    localStorage.setItem('hg-calm-system', JSON.stringify(saved));
+    renderJournal();
+  }
+
+  function toggleSound(force){
+    soundOn = typeof force === 'boolean' ? force : !soundOn;
+    $('soundToggle').checked = soundOn;
+    $('soundChip').textContent = soundOn ? 'Sound on' : 'Sound off';
+    if (soundOn) startAmbient(); else stopAmbient();
+  }
+
+  function toggleMotion(force){
+    motionOn = typeof force === 'boolean' ? force : !motionOn;
+    $('motionToggle').checked = motionOn;
+    document.querySelector('.bg-breeze').style.display = motionOn ? 'block' : 'none';
+    $('bgRipple').style.animationPlayState = motionOn ? 'running' : 'paused';
+    document.querySelectorAll('.bg-image').forEach(el => el.style.transitionDuration = motionOn ? '1.8s, 14s' : '1.2s, 1.2s');
+  }
+
+  function startAmbient(){
+    try{
+      stopAmbient();
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const master = audioCtx.createGain();
+      master.gain.value = 0.022;
+      master.connect(audioCtx.destination);
+
+      const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
+      const data = noiseBuffer.getChannelData(0);
+      for (let i=0;i<data.length;i++) data[i] = (Math.random()*2-1) * 0.18;
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = noiseBuffer; noise.loop = true;
+      const noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = 'lowpass'; noiseFilter.frequency.value = 480;
+      const wave = audioCtx.createOscillator(); wave.type = 'sine'; wave.frequency.value = 164;
+      const waveGain = audioCtx.createGain(); waveGain.gain.value = 0.012;
+      const lfo = audioCtx.createOscillator(); lfo.frequency.value = 0.08;
+      const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 0.006;
+      lfo.connect(lfoGain); lfoGain.connect(waveGain.gain);
+      noise.connect(noiseFilter); noiseFilter.connect(master);
+      wave.connect(waveGain); waveGain.connect(master);
+      noise.start(); wave.start(); lfo.start();
+      ambientNodes = [noise,wave,lfo,master];
+    }catch(err){ console.warn('ambient unavailable', err); soundOn=false; $('soundChip').textContent='Sound off'; }
+  }
+
+  function stopAmbient(){
+    ambientNodes.forEach(node => { try{ if (node.stop) node.stop(); } catch(e){} try{ if (node.disconnect) node.disconnect(); } catch(e){} });
+    ambientNodes = [];
+  }
+
+  $('startLifeBtn').addEventListener('click', () => transitionTo('life'));
+  $('startPondBtn').addEventListener('click', () => transitionTo('pond'));
+  document.querySelectorAll('[data-back]').forEach(btn => btn.addEventListener('click', () => transitionTo(btn.dataset.back)));
+  document.querySelectorAll('[data-focus]').forEach(btn => btn.addEventListener('click', () => focusField(btn.dataset.focus)));
+
+  $('lifeSend').addEventListener('click', () => {
+    const text = $('lifeInput').value.trim();
+    if (!text) { $('lifeStatus').textContent = 'Say a few words first. Short is fine.'; return; }
+    const response = generateLifeResponse(text);
+    $('lifeResponseText').textContent = response;
+    $('lifeResponse').classList.remove('hidden');
+    $('lifeStatus').textContent = 'Calm response generated.';
+    saveJournal(response);
+  });
+
+  $('lifeRest').addEventListener('click', async () => {
+    $('lifeInput').value = '';
+    $('lifeResponse').classList.add('hidden');
+    $('lifeStatus').textContent = 'Nothing saved. You can leave it here.';
+    await transitionTo('home');
+  });
+
+  $('pondSend').addEventListener('click', () => {
+    const text = $('pondInput').value.trim();
+    if (!text) { $('pondStatus').textContent = 'Tell the pond anything first.'; return; }
+    updatePondQuestion(text);
+    $('pondStatus').textContent = 'Question returned.';
+    saveJournal(generatePondQuestion(text));
+  });
+
+  $('pondClear').addEventListener('click', () => {
+    $('pondInput').value = '';
+    $('pondQuestion').textContent = 'What’s on your mind?';
+    $('pondReflection').textContent = 'What’s on your mind?';
+    $('pondLead').textContent = 'Say whatever is true. The response should come back as a question that helps you look inward.';
+    $('pondStatus').textContent = 'Cleared.';
+  });
+
+  $('settingsBtn').addEventListener('click', () => $('settingsDrawer').classList.toggle('show'));
+  $('closeSettingsBtn').addEventListener('click', () => $('settingsDrawer').classList.remove('show'));
+  $('openJournalBtn').addEventListener('click', () => transitionTo('journal'));
+  $('clearJournalBtn').addEventListener('click', () => {
+    saved.journal = [];
+    localStorage.setItem('hg-calm-system', JSON.stringify(saved));
+    renderJournal();
+  });
+  $('soundChip').addEventListener('click', () => toggleSound());
+  $('soundToggle').addEventListener('change', e => toggleSound(e.target.checked));
+  $('motionToggle').addEventListener('change', e => toggleMotion(e.target.checked));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') $('settingsDrawer').classList.remove('show');
+  });
+
+  setBackground('home');
+  toggleMotion(true);
+  renderJournal();
+})();
+</script>
+</body>
+</html>
